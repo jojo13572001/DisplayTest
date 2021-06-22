@@ -4,6 +4,7 @@ import os
 import owtClient
 import subprocess
 import sys
+import json
 
 waitTime = 5
 #---------------Close All Tested Server and Clients-----------
@@ -48,14 +49,12 @@ owtClient.StartShare(driver)
 owtClient.waitStreamReady(driver)
 time.sleep(waitTime)
 stats = owtClient.GetStats(driver)
-if (len(stats) == 0):
-    print("Get stat report failure")
-    sys.exit(0)
-    
+
 #-------------------Test Cases-------------------------------
 def test_check_h264_codec_func():
     for stat in stats:
-       if stat['type'] == 'inbound-rtp':
-          assert (stat['codecId'] == Module.get_codec_type()) is True
+       jsonStat = json.loads(stat)
+       if jsonStat['type'] == 'inbound-rtp':
+          assert (jsonStat['codecId'] == Module.get_codec_type()) is True
 
 close_all_instances()
