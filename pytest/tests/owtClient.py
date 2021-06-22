@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 remoteUID = "831582076"
 remoteOTP = "0000"
+waitTime = 5
 
 def init(screenID):
     options = Options()
@@ -29,13 +30,14 @@ def waitDisplayReady(driver):
             if (uid.get_attribute("disabled")=='true'):
                 return True
             return False
-        element = WebDriverWait(driver, 5).until(ready)
+        element = WebDriverWait(driver, waitTime).until(ready)
     except:
+        print ("Fail to wait for remote Display ready in "+ waitTime + "seconds")
         driver.quit()
 
 ##--------------login p2p server---------------------
 def loginAndWaitReady(driver):
-    print ("Start login p2p server")
+    print ("Start to login p2p server")
     login = driver.find_element_by_id('login')
     login.click()
     loginId = driver.find_element_by_id("login")
@@ -45,9 +47,9 @@ def loginAndWaitReady(driver):
             if (loginId.get_attribute("disabled")=='true'):
                 return True
             return False
-        element = WebDriverWait(driver, 5).until(ready)
+        element = WebDriverWait(driver, waitTime).until(ready)
     except: 
-        print ('Login in p2p server fail')
+        print ("Fail to wait to login in p2p server in "+ waitTime + "seconds")
         driver.quit()
 
 ##---------Set remote id, otp and click share screen---
@@ -70,8 +72,9 @@ def waitStreamReady(driver):
             if (shareButtonId.get_attribute("disabled")=='true'):
                 return True
             return False
-        element = WebDriverWait(driver, 5).until(ready)
+        element = WebDriverWait(driver, waitTime).until(ready)
     except:
+        print ("Fail to wait for p2p stream ready in "+ waitTime + "seconds")
         driver.quit()
 
 ##---------Get stat report from text area----------------
