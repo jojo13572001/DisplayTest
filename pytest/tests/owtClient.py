@@ -1,4 +1,5 @@
 import os
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
@@ -31,8 +32,9 @@ def waitDisplayReady(driver):
                 return True
             return False
         element = WebDriverWait(driver, waitTime).until(ready)
+        print ("Remote Display is ready")
     except:
-        print ("Fail to wait for remote Display ready in "+ waitTime + "seconds")
+        print ("Fail to wait for remote Display ready in "+ str(waitTime) + "seconds")
         driver.quit()
 
 ##--------------login p2p server---------------------
@@ -48,12 +50,13 @@ def loginAndWaitReady(driver):
                 return True
             return False
         element = WebDriverWait(driver, waitTime).until(ready)
+        print ("Successfully login p2p server")
     except: 
-        print ("Fail to wait to login in p2p server in "+ waitTime + "seconds")
+        print ("Fail to wait to login in p2p server in "+ str(waitTime) + "seconds")
         driver.quit()
 
 ##---------Set remote id, otp and click share screen---
-def StartShare(driver):
+def startShare(driver):
     remoteUidText = driver.find_element_by_id('remote-uid')
     remoteUidText.send_keys(remoteUID)
     remoteUidButton = driver.find_element_by_id('set-remote-uid')
@@ -73,13 +76,16 @@ def waitStreamReady(driver):
                 return True
             return False
         element = WebDriverWait(driver, waitTime).until(ready)
+        print ("p2p stream is ready")
     except:
-        print ("Fail to wait for p2p stream ready in "+ waitTime + "seconds")
+        print ("Fail to wait for p2p stream ready in "+ str(waitTime) + "seconds")
         driver.quit()
 
 ##---------Get stat report from text area----------------
-def GetStats(driver):
+def getStats(driver):
+    print ("Start to get stat reports")
     statButtonId = driver.find_element_by_id('target-stats')
     dataTextId = driver.find_element_by_id('dataReceived')
     statButtonId.click()
+    time.sleep(3)
     return dataTextId.get_attribute('value')

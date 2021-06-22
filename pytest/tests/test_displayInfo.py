@@ -45,16 +45,17 @@ check_process("chrome.exe", "Launch owt-client-javascript failure")
 #---------------Start automation-----------------------------
 owtClient.waitDisplayReady(driver)
 owtClient.loginAndWaitReady(driver)
-owtClient.StartShare(driver)
+owtClient.startShare(driver)
 owtClient.waitStreamReady(driver)
-time.sleep(waitTime)
-stats = owtClient.GetStats(driver)
+strStats = owtClient.getStats(driver)
+while strStats is '':
+	strStats = owtClient.getStats(driver)
+stats = json.loads(strStats)
 
 #-------------------Test Cases-------------------------------
 def test_check_h264_codec_func():
     for stat in stats:
-       jsonStat = json.loads(stat)
-       if jsonStat['type'] == 'inbound-rtp':
-          assert (jsonStat['codecId'] == Module.get_codec_type()) is True
+        if stat['type'] == "inbound-rtp":
+           assert Module.check_h264_codec_type(stat['codecId']) is True
 
 close_all_instances()
