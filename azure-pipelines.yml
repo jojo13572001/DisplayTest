@@ -1,0 +1,11 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-2019'
+steps:
+- task: BatchScript@1
+  name: AutomationTest
+  inputs:
+    filename: '.pipelines/auto_test.cmd'
+    workingFolder: 'pytest'

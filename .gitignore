@@ -1,32 +1,7 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+/OWTP2PSampleMFC/x64
+/OWTP2PSampleMFC/.vs
+/OWTP2PSampleMFC/P2PSampleMFC/x64
+/pytest/__pycache__
+/pytest/libs
+/pytest/tests/__pycache__
+/pytest/tests/libs/__pycache__

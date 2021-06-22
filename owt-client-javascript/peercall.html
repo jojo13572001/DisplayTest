@@ -1,0 +1,304 @@
+<!--
+ Copyright (C) <2018> Intel Corporation
+
+ SPDX-License-Identifier: Apache-2.0
+-->
+
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Intel&reg; Collaboration Suite for WebRTC P2P Direct Call Sample</title>
+  <style>
+    html{
+      font-family: "intel-clear","tahoma",Helvetica,"helvetica",Arial,sans-serif;
+      font-size: 90%;
+    }
+    textarea {
+      font-family: monospace;
+      margin: 2px;
+      height: 100px;
+      width: 250px;
+    }
+    div#send {
+      float: left;
+      margin-right: 20px;
+    }
+    div#sendreceive {
+      margin: 0 0 20px 0;
+    }
+    h2 {
+      margin: 0 0 10px 0;
+    }
+    div#local {
+      float: left;
+      margin-right: 20px;
+    }
+    div#remote {
+      float: left;
+    }
+    div#screen {
+      float: left;
+    }
+    div#videocontainer {
+      margin: 0 0 20px 0;
+      width: 1300px;
+      height: 700px;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" type="text/javascript"></script>
+  <script src="https://webrtchacks.github.io/adapter/adapter-7.0.0.js" type="text/javascript"></script>
+  <script src="js/sc.websocket.js" type="text/javascript"></script>
+  <script src="js/owt.js" type="text/javascript"></script>
+  <h1>Intel<sup>&reg;</sup> Collaboration Suite for WebRTC</h1>
+  <h2>P2P Sample</h2>
+  <div id="description">
+    <p>This sample works with the latest Chrome and Firefox.</p>
+  </div>
+  <div id="control">
+    <p>
+      <input id="uid" type="text" />
+      <button id="login">Login</button>
+      <button id="logoff">Logoff</button>
+    </p>
+    <p>
+      <input id="remote-uid" type="text" />
+      <button id="set-remote-uid">Set Remote ID</button>
+    </p>
+    <p>
+      <input id="otp" type="text" /> <caption>OTP</caption>
+    </p>
+    <p>
+      <button id="target-video-publish">Share Camera</button>
+      <button id="target-video-unpublish">Stop Camera Sharing</button>
+      <button id="target-peerconnection-stop">Stop Conversation</button>
+      <button id="target-screen">Share Screen</button>
+      <button id="target-stats">Get Stats</button>
+    </p>
+  </div>
+  <div id="sendreceive">
+    <div id="send">
+      <h2>Send data</h2>
+      <textarea id="dataSent" rows="5" cols="10"></textarea>
+    </div>
+    <div id="receive">
+      <h2>Received data</h2>
+      <textarea id="dataReceived" rows="5" cols="10" disabled="true"></textarea>
+    </div>
+    <button id="data-send">Send data</button>
+  </div>
+  <div id="videocontainer">
+    <div id="local">
+      <h2>LocalView</h2>
+      <video width="320px" height="240px" id="localVideo" playsinline muted autoplay></video>
+    </div>
+    <div id="remote">
+      <h2>RemoteView</h2>
+      <video width="320px" height="240px" id="remoteVideo" playsinline muted autoplay></video>
+    </div>
+    <div id="screen">
+      <h2>ScreenView</h2>
+      <video width="640px" height="480px" id="screenVideo" playsinline muted autoplay></video>
+    </div>
+  </div>
+
+  <footer id="status"></footer>
+  <div id="infoDiv"></div>
+  <script type="text/javascript">
+    'use strict';
+    var isVideo = 1;
+    var serverAddress='https://localhost:8096';  // Please change example.com to signaling server's address.
+    const signaling = new SignalingChannel();
+    let publicationForCamera;
+    let publicationForScreen;
+    const controlSocket = io("https://localhost:8098");
+    controlSocket.on("connect", () => {
+      console.log("server socket id : " + controlSocket.id);
+      $('#uid').val(controlSocket.id);
+      $('#uid').prop('disabled', true);
+    });
+
+    var p2p = new Owt.P2P.P2PClient({
+      audioEncodings: true,
+      videoEncodings: [{codec:{name: 'h264'}}, {codec: {name: 'vp8'}}, {codec: {name: 'vp9'}}],
+      rtcConfiguration:{
+        iceServers: [{
+          urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302","stun:stun2.l.google.com:19302","stun:stun3.l.google.com:19302","stun:stun4.l.google.com:19302"]
+        }, {
+          urls: ["turn:18.138.196.140:3478", "stun:3.8.171.200:3478", "stun:18.138.196.140:3478", "stun:3.84.195.253:3478", 
+                 "turn:3.91.80.102:3478", "turn:3.84.195.253:3478", "stun:3.91.80.102:3478", "stun:13.251.124.178:3478", 
+                 "turn:3.8.171.200:3478", "turn:13.251.124.178:3478"
+          ],
+          credential: "Y2Ytb3BlbnZpZHUtYmxh",
+          username: "turn_user"
+        }]
+      },
+    }, signaling);
+    var localStream;
+    var localScreen;
+    var screenStream;
+
+    var getTargetId = function() {
+      console.log("remote-uid " + $('#remote-uid').val());
+      return $('#remote-uid').val();
+    };
+
+    var startShareScreen = function(){
+        var config = {
+          audio:{
+            source:'screen-cast'
+          },
+          video:{
+            resolution:{
+              "width": 1920,
+              "height":1080
+            },
+            frameRate:20,
+            source:'screen-cast'
+          }
+        }
+        let mediaStream;
+        Owt.Base.MediaStreamFactory.createMediaStream(config).then(stream => {
+          mediaStream = stream;
+          screenStream = new Owt.Base.LocalStream(mediaStream, new Owt.Base.StreamSourceInfo('screen-cast', 'screen-cast'));
+          $('#local').children('video').get(0).srcObject = screenStream.mediaStream;
+          console.log("start to publish " + getTargetId());
+          p2p.publish(getTargetId(), screenStream).then(publication=>{
+            publicationForScreen = publication;
+            $('#target-screen').prop('disabled', true);
+          }), error => {
+            console.log('Failed to share screen.');
+          };
+        }, err=>{
+          console.error('Failed to create MediaStream, '+ err);
+        });
+    };
+
+    $(document).ready(function() {
+      $('#set-remote-uid').click(function() {
+        p2p.allowedRemoteIds=[getTargetId()];
+        console.log("set remote uid " + p2p.allowedRemoteIds);
+      });
+
+      $('#target-screen').click(function() {
+         //$('#login').click();
+         //$('#set-remote-uid').click()
+         controlSocket.emit("share", {otp:$('#otp').val()});
+         controlSocket.on("share", (data) => {
+         if (data["success"] === true){
+                console.log("receive share channel message " + data);
+                startShareScreen();
+            } 
+         });
+      });
+
+       $('#target-stats').click(function() {
+         //$('#login').click();
+         //$('#set-remote-uid').click()
+         controlSocket.emit("stats", {action:"getstatreport"});
+         controlSocket.on("stats", (data) => {
+         if (data["success"] === true){
+                console.log("receive stats report " + JSON.stringify(data["data"]["statreport"]));
+                $('#dataReceived').val(data["data"]["statreport"]);
+            } 
+         });
+      });
+
+      $('#target-video-unpublish').click(function() {
+        $('#target-video-publish').prop('disabled', false);
+        $('#target-video-unpublish').prop('disabled', true);
+        publicationForCamera.stop();
+        for(const track of localStream.mediaStream.getTracks()){
+          track.stop();
+        }
+        localStream = undefined;
+      });
+
+      $('#target-video-publish').click(function() {
+        $('#target-video-unpublish').prop('disabled', false);
+        $('#target-video-publish').prop('disabled', true);
+        if (localStream) {
+          p2p.publish(getTargetId(), localStream).then(publication=>{
+            publicationForCamera = publication;
+          }, error => {
+            console.log('Failed to share video.');
+          }); // Publish local stream to remote client
+        } else {
+          const audioConstraintsForMic = new Owt.Base.AudioTrackConstraints(Owt.Base.AudioSourceInfo.MIC);
+          const videoConstraintsForCamera = new Owt.Base.VideoTrackConstraints(Owt.Base.VideoSourceInfo.CAMERA);
+          let mediaStream;
+          Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
+            mediaStream=stream;
+            localStream = new Owt.Base.LocalStream(mediaStream, new Owt.Base.StreamSourceInfo('mic', 'camera'));
+            $('#local').children('video').get(0).srcObject = localStream.mediaStream;
+            p2p.publish(getTargetId(), localStream).then(publication=>{
+              publicationForCamera = publication;
+            }, error => {
+              console.log('Failed to share video.');
+            });
+          }, err=>{
+            console.error('Failed to create MediaStream, '+err);
+          });
+        }
+      });
+
+      $('#target-peerconnection-stop').click(function() {
+        p2p.stop($('#remote-uid').val()); // Stop conversation
+      });
+
+      $('#login').click(function() {
+        if ($('#uid').prop('disabled') != true){
+            return;
+        }
+        p2p.connect({
+          host: serverAddress,
+          token: $('#uid').val()
+        }).then(()=>{
+          $('#login').prop('disabled', true);
+          console.log("success login id " + $('#uid').val());
+        }, error => {
+          console.log('Failed to connect to the signaling server.');
+        }); // Connect to signaling server.
+      });
+
+      $('#logoff').click(function() {
+        p2p.disconnect();
+        $('#uid').prop('disabled', false);
+        $('#login').prop('disabled', false);
+      });
+
+      $('#data-send').click(function() {
+        p2p.send(getTargetId(), $('#dataSent').val()); // Send data to remote endpoint.
+      });
+    });
+
+    p2p.addEventListener('streamadded', function(e) { // A remote stream is available.
+      e.stream.addEventListener('ended', ()=>{
+        console.log('Stream is removed.');
+      });
+      if (e.stream.source.video==='screen-cast') {
+        $('#screen video').show();
+        $('#screen video').get(0).srcObject = e.stream.mediaStream;
+        $('#screen video').get(0).play();
+      } else if (e.stream.source.audio || e.stream.source.video) {
+        $('#remote video').show();
+        $('#remote video').get(0).srcObject = e.stream.mediaStream;
+        $('#remote video').get(0).play();
+      }
+      isVideo++;
+    });
+
+    p2p.addEventListener('messagereceived', function(e) { // Received data from datachannel.
+      $('#dataReceived').val(e.origin + ': ' + e.message);
+      console.log("[Bean]" + e.message);
+    });
+
+    window.onbeforeunload = function() {
+      p2p.stop($('#remote-uid').val());
+    }
+  </script>
+</body>
