@@ -7,4 +7,4 @@ popd
 
 call pip install -r requirements.txt
 
-call pytest
+call pytest --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml

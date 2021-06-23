@@ -1,2 +1,4 @@
 selenium==3.141.0
 pytest==6.2.4
+pytest-azurepipelines==0.8.0
+pytest-cov==2.12.1
