@@ -6,3 +6,9 @@
 /pytest/tests/__pycache__
 /pytest/tests/libs/__pycache__
 /DisplayWPF_Net47/imgui.ini
+/pytest/.coverage
+/pytest/auto_test.cmd
+/pytest/coverage.xml
+/pytest/htmlcov
+/pytest/junit
+/pytest/test-output.xml
