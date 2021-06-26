@@ -33,27 +33,26 @@ def waitDisplayReady(driver):
             return False
         element = WebDriverWait(driver, waitTime).until(ready)
         print ("Remote Display is ready")
+        return True
     except:
-        print ("Fail to wait for remote Display ready in "+ str(waitTime) + "seconds")
-        driver.quit()
+        return False
 
 ##--------------login p2p server---------------------
 def loginAndWaitReady(driver):
     print ("Start to login p2p server")
     login = driver.find_element_by_id('login')
     login.click()
-    loginId = driver.find_element_by_id("login")
     try:    
         print ("Start to wait for login success")
         def ready(driver):
-            if (loginId.get_attribute("disabled")=='true'):
+            if (login.get_attribute("disabled")=='true'):
                 return True
             return False
         element = WebDriverWait(driver, waitTime).until(ready)
         print ("Successfully login p2p server")
-    except: 
-        print ("Fail to wait to login in p2p server in "+ str(waitTime) + "seconds")
-        driver.quit()
+        return True
+    except:
+        return False
 
 ##---------Set remote id, otp and click share screen---
 def startShare(driver):
@@ -77,9 +76,9 @@ def waitStreamReady(driver):
             return False
         element = WebDriverWait(driver, waitTime).until(ready)
         print ("p2p stream is ready")
+        return True
     except:
-        print ("Fail to wait for p2p stream ready in "+ str(waitTime) + "seconds")
-        driver.quit()
+        return False
 
 ##---------Get stat report from text area----------------
 def getStats(driver):

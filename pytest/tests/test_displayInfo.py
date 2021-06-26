@@ -21,6 +21,12 @@ def check_process(processName, errorMessage):
 	   close_all_instances()
 	   sys.exit(0)
 
+def check_state(state, errorMessage):
+	if state == False:
+	   print(errorMessage)
+	   close_all_instances()
+	   sys.exit(0)
+
 #---------------Set Environment Variables--------------------
 os.environ["ControlSignalEndpoint_STAGE"] = "https://localhost:8098"
 os.environ["CodeMappingEndpoint_STAGE"] = "https://localhost:8096"
@@ -43,10 +49,13 @@ driver = owtClient.launch(currentDir+"/../../owt-client-javascript/peercall.html
 check_process("chrome.exe", "Launch owt-client-javascript failure")
 
 #---------------Start automation-----------------------------
-owtClient.waitDisplayReady(driver)
-owtClient.loginAndWaitReady(driver)
+result = owtClient.waitDisplayReady(driver)
+check_state(result, "wait for display stream ready fail")
+result = owtClient.loginAndWaitReady(driver)
+check_state(result, "wait for login ready fail")
 owtClient.startShare(driver)
-owtClient.waitStreamReady(driver)
+result = owtClient.waitStreamReady(driver)
+check_state(result, "wait for stream ready fail")
 strStats = owtClient.getStats(driver)
 while strStats is '':
 	strStats = owtClient.getStats(driver)
