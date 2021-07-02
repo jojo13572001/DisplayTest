@@ -3,9 +3,9 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.color import Color
 
 remoteUID = "831582076"
-remoteOTP = "0000"
 waitTime = 5
 
 def init(screenID):
@@ -55,13 +55,13 @@ def loginAndWaitReady(driver):
         return False
 
 ##---------Set remote id, otp and click share screen---
-def startShare(driver):
+def startShare(driver, otp):
     remoteUidText = driver.find_element_by_id('remote-uid')
     remoteUidText.send_keys(remoteUID)
     remoteUidButton = driver.find_element_by_id('set-remote-uid')
     remoteUidButton.click()
-    otp = driver.find_element_by_id('otp')
-    otp.send_keys(remoteOTP)
+    otpId = driver.find_element_by_id('otp')
+    otpId.send_keys(otp)
     share = driver.find_element_by_id('target-screen')
     share.click()
 
@@ -88,3 +88,21 @@ def getStats(driver):
     statButtonId.click()
     time.sleep(3)
     return dataTextId.get_attribute('value')
+
+
+def WaitforOTPfail(driver):
+    otpText = driver.find_element_by_id('otp-name')
+    try:
+        print ("Start to wait for OTP verification result")
+        def ready(driver):
+            rgb = otpText.value_of_css_property("color")
+            rgbhex = Color.from_string(rgb).hex
+            if (rgbhex=="#ff0000"):
+                return True
+            return False
+        element = WebDriverWait(driver, waitTime).until(ready)
+        print ("OTP successfully get failure state")
+        return True
+    except: 
+        print ("Fail to wait for Display OTP verification in "+ str(waitTime) + " seconds")
+        return False

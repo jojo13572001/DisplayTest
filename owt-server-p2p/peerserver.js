@@ -171,6 +171,9 @@ function onControlConnection(socket){
         if (data["action"] === "connect"){
            webSocket.emit("share", {"success":true});
         }
+        else {
+           webSocket.emit("share", {"success":false});
+        }
       });
 
       socket.on(windowsSocket.uid, (data) => {

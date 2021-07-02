@@ -70,7 +70,7 @@
       <button id="set-remote-uid">Set Remote ID</button>
     </p>
     <p>
-      <input id="otp" type="text" /> <caption>OTP</caption>
+      <input id="otp" type="text" /> <b id="otp-name">OTP</b>
     </p>
     <p>
       <button id="target-video-publish">Share Camera</button>
@@ -189,10 +189,14 @@
          //$('#set-remote-uid').click()
          controlSocket.emit("share", {otp:$('#otp').val()});
          controlSocket.on("share", (data) => {
-         if (data["success"] === true){
-                console.log("receive share channel message " + data);
-                startShareScreen();
-            } 
+           if (data["success"] === true){
+                  console.log("receive share channel message " + data);
+                  startShareScreen();
+              }
+           else{
+              console.log("refuse for the otp " + $('#otp').val());
+              $('#otp-name').css("color", "#ff0000");
+           } 
          });
       });
 
@@ -294,7 +298,6 @@
 
     p2p.addEventListener('messagereceived', function(e) { // Received data from datachannel.
       $('#dataReceived').val(e.origin + ': ' + e.message);
-      console.log("[Bean]" + e.message);
     });
 
     window.onbeforeunload = function() {
