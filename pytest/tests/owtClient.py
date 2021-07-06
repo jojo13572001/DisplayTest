@@ -90,7 +90,7 @@ def getStats(driver):
     return dataTextId.get_attribute('value')
 
 
-def WaitforOTPfail(driver):
+def waitforOTPfail(driver):
     otpText = driver.find_element_by_id('otp-name')
     try:
         print ("Start to wait for OTP verification result")
@@ -106,3 +106,9 @@ def WaitforOTPfail(driver):
     except: 
         print ("Fail to wait for Display OTP verification in "+ str(waitTime) + " seconds")
         return False
+
+def stopVideo(driver):
+    print ("Start to stop video sharing")
+    stopButtonId = driver.find_element_by_id('stop-video')
+    stopButtonId.click()
+

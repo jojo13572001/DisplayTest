@@ -78,6 +78,7 @@
       <button id="target-peerconnection-stop">Stop Conversation</button>
       <button id="target-screen">Share Screen</button>
       <button id="target-stats">Get Stats</button>
+      <button id="stop-video">Stop</button>
     </p>
   </div>
   <div id="sendreceive">
@@ -185,8 +186,6 @@
       });
 
       $('#target-screen').click(function() {
-         //$('#login').click();
-         //$('#set-remote-uid').click()
          controlSocket.emit("share", {otp:$('#otp').val()});
          controlSocket.on("share", (data) => {
            if (data["success"] === true){
@@ -200,9 +199,7 @@
          });
       });
 
-       $('#target-stats').click(function() {
-         //$('#login').click();
-         //$('#set-remote-uid').click()
+      $('#target-stats').click(function() {
          controlSocket.emit("stats", {action:"getstatreport"});
          controlSocket.on("stats", (data) => {
          if (data["success"] === true){
@@ -210,6 +207,10 @@
                 $('#dataReceived').val(data["data"]["statreport"]);
             } 
          });
+      });
+
+      $('#stop-video').click(function() {
+         controlSocket.emit("stop", {action:"disconnect"});
       });
 
       $('#target-video-unpublish').click(function() {

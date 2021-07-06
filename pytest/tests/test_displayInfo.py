@@ -6,7 +6,7 @@ import subprocess
 import sys
 import json
 
-waitTime = 5
+waitTime = 3
 #---------------Close All Tested Server and Clients-----------
 def close_all_instances():
     os.system('taskkill /f /im chrome.exe')
@@ -83,5 +83,41 @@ def test_check_otp_fail_func():
     result = owtClient.loginAndWaitReady(driver)
     check_state(result, "wait for login ready fail")
     owtClient.startShare(driver, "1234")
-    assert owtClient.WaitforOTPfail(driver) is True
+    assert owtClient.waitforOTPfail(driver) is True
+    close_all_instances()
+
+#if vidoe is stopped, we will get the same timestamp from 2 sequential stat reports
+def test_check_stopped_func():
+    driver = launch_env(currentDir)
+    result = owtClient.waitDisplayReady(driver)
+    check_state(result, "wait for display stream ready fail")
+    result = owtClient.loginAndWaitReady(driver)
+    check_state(result, "wait for login ready fail")
+    owtClient.startShare(driver, "0000")
+    result = owtClient.waitStreamReady(driver)
+    check_state(result, "wait for stream ready fail")
+
+    strStats = owtClient.getStats(driver)
+    while strStats is '':
+          strStats = owtClient.getStats(driver)
+
+    owtClient.stopVideo(driver)
+    time.sleep(waitTime)
+
+    strStats = owtClient.getStats(driver)
+    assert (strStats == '') is False
+    stats = json.loads(strStats)
+    for stat in stats:
+        if stat['type'] == "inbound-rtp":
+           timeStampStart = stat['timestamp']
+
+    time.sleep(waitTime)
+    strStats = owtClient.getStats(driver)
+    assert (strStats == '') is False
+    stats = json.loads(strStats)
+    for stat in stats:
+        if stat['type'] == "inbound-rtp":
+           timeStampStop = stat['timestamp']
+
+    assert (timeStampStart == timeStampStop) is True
     close_all_instances()

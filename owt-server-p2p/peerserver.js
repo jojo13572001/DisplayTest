@@ -171,13 +171,10 @@ function onControlConnection(socket){
         if (data["action"] === "connect"){
            webSocket.emit("share", {"success":true});
         }
-        else {
+        else if (data["action"] === "denied" || data["action"] === "blocked"){
            webSocket.emit("share", {"success":false});
         }
-      });
-
-      socket.on(windowsSocket.uid, (data) => {
-        if (data["action"] === "getstatreport"){
+        else if (data["action"] === "getstatreport"){
            console.log("server receive stats report reply");
            webSocket.emit("stats", {"success":true, "data":data});
         }
@@ -195,6 +192,11 @@ function onControlConnection(socket){
 
       socket.on("stats", (data) => {
         console.log("server receive stats report request " + data.action);
+        windowsSocket.emit(windowsSocket.uid, {"messageFor":windowsSocket.uid, "userid":webSocket.uid, "action":data.action});
+      });
+
+      socket.on("stop", (data) => {
+        console.log("server receive stop request")
         windowsSocket.emit(windowsSocket.uid, {"messageFor":windowsSocket.uid, "userid":webSocket.uid, "action":data.action});
       });
     }
