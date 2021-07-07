@@ -12,6 +12,7 @@ def close_all_instances():
     os.system('taskkill /f /im chrome.exe')
     os.system('taskkill /f /im DisplaySubprocess.exe')
     os.system('taskkill /f /im DisplayWPF.exe')
+    os.system('taskkill /f /im clumsy.exe')
     os.system('taskkill /f /im node.exe')
 
 def check_process(processName, errorMessage):
@@ -37,6 +38,12 @@ def launch_env(currentDir):
     os.system(currentDir+"/../../DisplayWPF_Net47/launch.bat")
     time.sleep(waitTime)
     check_process("DisplayWPF.exe", "Launch DisplayWPF failure")
+
+#---------------Launch clumsy--------------------------------
+    args = '--filter "inbound and ip.SrcAddr == 192.168.1.137"'
+    os.system(currentDir+"/../../clumsy/launch.bat " + args)
+    time.sleep(waitTime)
+    check_process("clumsy.exe", "Launch clumsy failure")
 
 #---------------Launch web client----------------------------
     driver = owtClient.launch(currentDir+"/../../owt-client-javascript/peercall.html", "Entire screen")
