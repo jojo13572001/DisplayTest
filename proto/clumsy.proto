@@ -1,0 +1,25 @@
+// echo.proto
+syntax = "proto3";
+package clumsy;
+
+// The request message containing parameters.
+message LaunchRequest {
+  string args = 1;
+}
+
+message TerminateRequest {
+  bool terminate = 1;
+}
+
+// The response message containing success/failure message.
+message Reply {
+  string result = 1;
+  string message = 2;
+}
+
+// The echo service definition.
+service Launch {
+  // Launch reply.
+  rpc Start (LaunchRequest) returns (Reply) {}
+  rpc Terminate (TerminateRequest) returns (Reply) {}
+}

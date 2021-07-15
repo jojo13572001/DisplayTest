@@ -1,0 +1,16 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-2019'
+
+variables:
+  app-version: 'myViewBoard Display 1.0.26.0.msi'
+  stage-production: 'production'
+
+steps:
+- task: BatchScript@1
+  name: AutomationTest
+  inputs:
+    filename: 'auto_test.cmd'
+    arguments: '$(stage-production) "$(app-version)"'

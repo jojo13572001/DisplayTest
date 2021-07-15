@@ -12,3 +12,8 @@
 /pytest/htmlcov
 /pytest/junit
 /pytest/test-output.xml
+/owt-server-p2p/__pycache__
+/clumsy/__pycache__
+/DisplayWPF_Net47/__pycache__
+/proto/generated/__pycache__
+/test-output.xml

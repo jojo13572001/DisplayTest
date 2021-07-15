@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.color import Color
 
 remoteUID = "831582076"
-waitTime = 5
+waitTime = 3
 
 def init(screenID):
     options = Options()
@@ -86,7 +86,7 @@ def getStats(driver):
     statButtonId = driver.find_element_by_id('target-stats')
     dataTextId = driver.find_element_by_id('dataReceived')
     statButtonId.click()
-    time.sleep(3)
+    time.sleep(waitTime)
     return dataTextId.get_attribute('value')
 
 
