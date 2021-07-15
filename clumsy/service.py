@@ -29,18 +29,17 @@ class Servicer(clumsy_pb2_grpc.LaunchServicer):
         currentDir = os.path.dirname(os.path.realpath(__file__))
         os.system(currentDir + "/launch.bat " + request.args)
         time.sleep(waitTime)
-        result = check_process("clumsy.exe")
+        result = check_process(request.processName)
         if result == True:
            return clumsy_pb2.Reply(result='OK', message="")
         else:
-           return clumsy_pb2.Reply(result='Fail', message="clumsy launch fail")
+           return clumsy_pb2.Reply(result='Fail', message=request.processName + " launch fail")
 
     def Terminate(self, request, context):
-        if request.terminate == True:
-           os.system('taskkill /f /im clumsy.exe')
-           time.sleep(waitTime)
-           resultNode = check_process("clumsy.exe")
-           if resultNode == False:
-              return clumsy_pb2.Reply(result='OK', message="")
-           else:
-              return clumsy_pb2.Reply(result='Fail', message="clumsy terminate Failure. It still exists.")
+        os.system('taskkill /f /im ' + request.processName)
+        time.sleep(waitTime)
+        resultNode = check_process(request.processName)
+        if resultNode == False:
+           return clumsy_pb2.Reply(result='OK', message="")
+        else:
+           return clumsy_pb2.Reply(result='Fail', message=request.processName + " terminate Failure. It still exists.")

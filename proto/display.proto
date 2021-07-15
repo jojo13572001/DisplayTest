@@ -7,10 +7,12 @@ message LaunchRequest {
   string ControlSignalEndpoint_STAGE = 1;
   string CodeMappingEndpoint_STAGE = 2;
   string SignalingServer = 3;
+  string processName = 4;
 }
 
 message TerminateRequest {
-  bool terminate = 1;
+  string processName = 1;
+  string subProcessName = 2;
 }
 
 // The response message containing success/failure message.

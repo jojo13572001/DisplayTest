@@ -25,11 +25,12 @@ SignalingServer="https://localhost:8096"
 def close_all_instances(owt_server_p2pStub, displayStub, clumsyStub):
     os.system('taskkill /f /im chrome.exe')
     if displayStub != None:
-       displayStub.Terminate(display_pb2.TerminateRequest(terminate=True))
+       displayStub.Terminate(display_pb2.TerminateRequest(processName="DisplayWPF.exe",
+                                                          subProcessName="DisplaySubprocess.exe"))
     if clumsyStub != None:
-       clumsyStub.Terminate(clumsy_pb2.TerminateRequest(terminate=True))
+       clumsyStub.Terminate(clumsy_pb2.TerminateRequest(processName="clumsy.exe"))
     if owt_server_p2pStub != None:
-       owt_server_p2pStub.Terminate(owt_server_p2p_pb2.TerminateRequest(terminate=True))
+       owt_server_p2pStub.Terminate(owt_server_p2p_pb2.TerminateRequest(processName="node.exe"))
 
 def check_process(processName, errorMessage, owt_server_p2pStub, displayStub, clumsyStub):
     progs = str(subprocess.check_output('tasklist'))
@@ -49,7 +50,7 @@ def launch_env(currentDir):
 #---------------Remote Launch owt-server-p2p-------------------------------
     channel = grpc.insecure_channel(owt_server_p2p_Address)
     owt_server_p2pStub = owt_server_p2p_pb2_grpc.LaunchStub(channel)
-    response = owt_server_p2pStub.Start(owt_server_p2p_pb2.LaunchRequest(message="start"))
+    response = owt_server_p2pStub.Start(owt_server_p2p_pb2.LaunchRequest(processName="node.exe"))
     check_state(response.result=="OK", response.message, owt_server_p2pStub, None, None)
 
 #---------------Remote Launch Display-------------------------------
@@ -57,13 +58,15 @@ def launch_env(currentDir):
     displayStub = display_pb2_grpc.LaunchStub(channel)
     response = displayStub.Start(display_pb2.LaunchRequest(ControlSignalEndpoint_STAGE=ControlSignalEndpoint_STAGE,
                                                            CodeMappingEndpoint_STAGE=CodeMappingEndpoint_STAGE,
-                                                           SignalingServer=SignalingServer))
+                                                           SignalingServer=SignalingServer,
+                                                           processName="DisplayWPF.exe"))
     check_state(response.result=="OK", response.message, owt_server_p2pStub, displayStub, None)
 
 #---------------Remote Launch clumsy--------------------------------
     channel = grpc.insecure_channel(clumsyAddress)
     clumsyStub = clumsy_pb2_grpc.LaunchStub(channel)
-    response = clumsyStub.Start(clumsy_pb2.LaunchRequest(args='--filter "inbound and ip.SrcAddr == 192.168.1.137"'))
+    response = clumsyStub.Start(clumsy_pb2.LaunchRequest(args='--filter "inbound and ip.SrcAddr == 192.168.1.137"', 
+                                                         processName="clumsy.exe"))
     check_state(response.result=="OK", response.message, owt_server_p2pStub, displayStub, clumsyStub)
 
 #---------------Local Launch web client----------------------------

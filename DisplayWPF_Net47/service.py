@@ -35,21 +35,20 @@ class Servicer(display_pb2_grpc.LaunchServicer):
            currentDir = os.path.dirname(os.path.realpath(__file__))
            os.system(currentDir + "/launch.bat")
            time.sleep(waitTime)
-           result = check_process("DisplayWPF.exe")
+           result = check_process(request.processName)
            if result == True:
               return display_pb2.Reply(result='OK', message="")
            else:
-              return display_pb2.Reply(result='Fail', message="DisplayWPF.exe launch fail")
+              return display_pb2.Reply(result='Fail', message=request.processName + " launch fail")
         return display_pb2.Reply(result='Fail', message="server url is empty")
 
     def Terminate(self, request, context):
-        if request.terminate == True:
-           os.system('taskkill /f /im DisplaySubprocess.exe')
-           os.system('taskkill /f /im DisplayWPF.exe')
-           time.sleep(waitTime)
-           resultDisplayWPF = check_process("DisplayWPF.exe")
-           resultDisplaySubprocess = check_process("DisplaySubprocess.exe")
-           if resultDisplayWPF == False and resultDisplaySubprocess == False:
-              return display_pb2.Reply(result='OK', message="")
-           else:
-              return display_pb2.Reply(result='Fail', message="DisplayWPF.exe or DisplaySubprocess.exe terminate Failure. It still exists.")
+        os.system('taskkill /f /im ' + request.subProcessName)
+        os.system('taskkill /f /im ' + request.processName)
+        time.sleep(waitTime)
+        resultDisplayWPF = check_process(request.processName)
+        resultDisplaySubprocess = check_process(request.subProcessName)
+        if resultDisplayWPF == False and resultDisplaySubprocess == False:
+           return display_pb2.Reply(result='OK', message="")
+        else:
+           return display_pb2.Reply(result='Fail', message=request.processName + " or " + request.subProcessName + " terminate Failure. It still exists.")

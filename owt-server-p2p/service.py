@@ -29,18 +29,17 @@ class Servicer(owt_server_p2p_pb2_grpc.LaunchServicer):
         currentDir = os.path.dirname(os.path.realpath(__file__))
         os.system(currentDir + "/launch.bat")
         time.sleep(waitTime)
-        result = check_process("node.exe")
+        result = check_process(request.processName)
         if result == True:
            return owt_server_p2p_pb2.Reply(result='OK', message="")
         else:
-           return owt_server_p2p_pb2.Reply(result='Fail', message="owt-server-p2p launch fail")
+           return owt_server_p2p_pb2.Reply(result='Fail', message=request.processName + " launch fail")
 
     def Terminate(self, request, context):
-        if request.terminate == True:
-           os.system('taskkill /f /im node.exe')
-           time.sleep(waitTime)
-           resultNode = check_process("node.exe")
-           if resultNode == False:
-              return owt_server_p2p_pb2.Reply(result='OK', message="")
-           else:
-              return owt_server_p2p_pb2.Reply(result='Fail', message="owt-server-p2p terminate Failure. It still exists.")
+        os.system('taskkill /f /im ' + request.processName)
+        time.sleep(waitTime)
+        resultNode = check_process(request.processName)
+        if resultNode == False:
+           return owt_server_p2p_pb2.Reply(result='OK', message="")
+        else:
+           return owt_server_p2p_pb2.Reply(result='Fail', message=request.processName + " terminate Failure. It still exists.")

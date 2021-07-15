@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x14owt-server-p2p.proto\x12\x0eowt_server_p2p\" \n\rLaunchRequest\x12\x0f\n\x07message\x18\x01 \x01(\t\"%\n\x10TerminateRequest\x12\x11\n\tterminate\x18\x01 \x01(\x08\"(\n\x05Reply\x12\x0e\n\x06result\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t2\x91\x01\n\x06Launch\x12?\n\x05Start\x12\x1d.owt_server_p2p.LaunchRequest\x1a\x15.owt_server_p2p.Reply\"\x00\x12\x46\n\tTerminate\x12 .owt_server_p2p.TerminateRequest\x1a\x15.owt_server_p2p.Reply\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x14owt-server-p2p.proto\x12\x0eowt_server_p2p\"$\n\rLaunchRequest\x12\x13\n\x0bprocessName\x18\x01 \x01(\t\"\'\n\x10TerminateRequest\x12\x13\n\x0bprocessName\x18\x01 \x01(\t\"(\n\x05Reply\x12\x0e\n\x06result\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t2\x91\x01\n\x06Launch\x12?\n\x05Start\x12\x1d.owt_server_p2p.LaunchRequest\x1a\x15.owt_server_p2p.Reply\"\x00\x12\x46\n\tTerminate\x12 .owt_server_p2p.TerminateRequest\x1a\x15.owt_server_p2p.Reply\"\x00\x62\x06proto3'
 )
 
 
@@ -34,7 +34,7 @@ _LAUNCHREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='message', full_name='owt_server_p2p.LaunchRequest.message', index=0,
+      name='processName', full_name='owt_server_p2p.LaunchRequest.processName', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -53,7 +53,7 @@ _LAUNCHREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=40,
-  serialized_end=72,
+  serialized_end=76,
 )
 
 
@@ -66,9 +66,9 @@ _TERMINATEREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='terminate', full_name='owt_server_p2p.TerminateRequest.terminate', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='processName', full_name='owt_server_p2p.TerminateRequest.processName', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -84,8 +84,8 @@ _TERMINATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=74,
-  serialized_end=111,
+  serialized_start=78,
+  serialized_end=117,
 )
 
 
@@ -123,8 +123,8 @@ _REPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=113,
-  serialized_end=153,
+  serialized_start=119,
+  serialized_end=159,
 )
 
 DESCRIPTOR.message_types_by_name['LaunchRequest'] = _LAUNCHREQUEST
@@ -162,8 +162,8 @@ _LAUNCH = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=156,
-  serialized_end=301,
+  serialized_start=162,
+  serialized_end=307,
   methods=[
   _descriptor.MethodDescriptor(
     name='Start',
