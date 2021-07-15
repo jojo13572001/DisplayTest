@@ -26,6 +26,18 @@ rem if errorlevel 1 goto :error
 
 call pip install -r %~dp0/requirements.txt
 
+cd %~dp0/owt-server-p2p
+
+start launchRpc.bat
+
+cd %~dp0/DisplayWPF_Net47
+
+start launchRpc.bat
+
+cd %~dp0/clumsy
+
+start launchRpc.bat
+
 cd %~dp0/pytest
 
 call pytest --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml
