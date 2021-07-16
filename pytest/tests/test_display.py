@@ -6,20 +6,26 @@ import subprocess
 import sys
 import json
 import grpc
+import configparser
 currentDir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(currentDir+'/../../proto/generated')
 import owt_server_p2p_pb2, owt_server_p2p_pb2_grpc
 import display_pb2, display_pb2_grpc
 import clumsy_pb2, clumsy_pb2_grpc
 
-waitTime = 3
-owt_server_p2p_Address = 'localhost:50051'
-displayAddress = 'localhost:50052'
-clumsyAddress = 'localhost:50053'
+config = configparser.ConfigParser()
+config.read(currentDir + "/../../config.ini")
 
-ControlSignalEndpoint_STAGE="https://localhost:8098"
-CodeMappingEndpoint_STAGE="https://localhost:8096"
-SignalingServer="https://localhost:8096"
+waitTime = 3
+
+owt_server_p2p_rpc_Address = config['SignalingServer']['IP'] + ":"+ config['SignalingServer']['RPC_PORT']
+
+display_rpc_Address = config['Display']['IP'] + ":" + config['Display']['RPC_PORT']
+clumsy_rpc_Address = config['Clumsy']['IP'] + ":" + config['Clumsy']['RPC_PORT']
+
+ControlSignalEndpoint_STAGE = "https://" + config['ControlSignalEndpoint_STAGE']['IP'] + ":" + config['ControlSignalEndpoint_STAGE']['PORT']
+CodeMappingEndpoint_STAGE = "https://" + config['CodeMappingEndpoint_STAGE']['IP'] + ":" + config['CodeMappingEndpoint_STAGE']['PORT']
+SignalingServer = "https://" + config['SignalingServer']['IP'] + ":" + config['SignalingServer']['PORT']
 
 #---------------Close All Tested Server and Clients-----------
 def close_all_instances(owt_server_p2pStub, displayStub, clumsyStub):
@@ -48,13 +54,13 @@ def check_state(state, errorMessage, owt_server_p2pStub, displayStub, clumsyStub
 #Launch p2p servers
 def launch_env(currentDir):
 #---------------Remote Launch owt-server-p2p-------------------------------
-    channel = grpc.insecure_channel(owt_server_p2p_Address)
+    channel = grpc.insecure_channel(owt_server_p2p_rpc_Address)
     owt_server_p2pStub = owt_server_p2p_pb2_grpc.LaunchStub(channel)
     response = owt_server_p2pStub.Start(owt_server_p2p_pb2.LaunchRequest(processName="node.exe"))
     check_state(response.result=="OK", response.message, owt_server_p2pStub, None, None)
 
 #---------------Remote Launch Display-------------------------------
-    channel = grpc.insecure_channel(displayAddress)
+    channel = grpc.insecure_channel(display_rpc_Address)
     displayStub = display_pb2_grpc.LaunchStub(channel)
     response = displayStub.Start(display_pb2.LaunchRequest(ControlSignalEndpoint_STAGE=ControlSignalEndpoint_STAGE,
                                                            CodeMappingEndpoint_STAGE=CodeMappingEndpoint_STAGE,
@@ -63,14 +69,16 @@ def launch_env(currentDir):
     check_state(response.result=="OK", response.message, owt_server_p2pStub, displayStub, None)
 
 #---------------Remote Launch clumsy--------------------------------
-    channel = grpc.insecure_channel(clumsyAddress)
+    channel = grpc.insecure_channel(clumsy_rpc_Address)
     clumsyStub = clumsy_pb2_grpc.LaunchStub(channel)
     response = clumsyStub.Start(clumsy_pb2.LaunchRequest(args='--filter "inbound and ip.SrcAddr == 192.168.1.137"', 
                                                          processName="clumsy.exe"))
     check_state(response.result=="OK", response.message, owt_server_p2pStub, displayStub, clumsyStub)
 
 #---------------Local Launch web client----------------------------
-    driver = owtClient.launch(currentDir+"/../../owt-client-javascript/peercall.html", "Entire screen")
+    driver = owtClient.launch(currentDir+"/../../owt-client-javascript/peercall.html", "Entire screen", ControlSignalEndpoint_STAGE, 
+                                                                                                        CodeMappingEndpoint_STAGE,
+                                                                                                        SignalingServer)
     check_process("chrome.exe", "Launch owt-client-javascript failure", owt_server_p2pStub, displayStub, clumsyStub)
     return driver, owt_server_p2pStub, displayStub, clumsyStub
 

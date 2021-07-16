@@ -6,9 +6,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.color import Color
 
 remoteUID = "831582076"
-waitTime = 3
+waitTime = 5 # it should be large or test failure at waiting for stream ready in azure pipeline
 
-def init(screenID):
+def init(screenID, ControlSignalEndpoint_STAGE, CodeMappingEndpoint_STAGE, SignalingServer):
+    #generate env.js for owt-client-javascript initial configuration
+    currentDir = os.path.dirname(os.path.realpath(__file__))
+    fEnv = open(currentDir+"/../../owt-client-javascript/js/env.js", "w")
+    fEnv.write("env = {ControlSignalEndpoint_STAGE: '"+ControlSignalEndpoint_STAGE+
+                       "', CodeMappingEndpoint_STAGE: '"+CodeMappingEndpoint_STAGE+
+                       "', SignalingServer: '"+SignalingServer+"'};")
+    fEnv.close()
+    
     options = Options()
     options.set_capability("acceptInsecureCerts", True)
     options.add_argument("--window-size=1920,882")
@@ -17,8 +25,11 @@ def init(screenID):
     options.add_argument("--auto-select-desktop-capture-source=" + screenID)
     return options
 
-def launch(path, screenID):
-    driver = webdriver.Chrome(options=init(screenID))
+def launch(path, screenID, ControlSignalEndpoint_STAGE, CodeMappingEndpoint_STAGE, SignalingServer):
+    driver = webdriver.Chrome(options=init(screenID, 
+                                           ControlSignalEndpoint_STAGE, 
+                                           CodeMappingEndpoint_STAGE,
+                                           SignalingServer))
     driver.get(path)
     return driver
 

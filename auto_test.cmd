@@ -26,6 +26,7 @@ rem if errorlevel 1 goto :error
 
 call pip install -r %~dp0/requirements.txt
 
+rem --local launch rpc servers for test---
 cd %~dp0/owt-server-p2p
 
 start launchRpc.bat
@@ -37,6 +38,7 @@ start launchRpc.bat
 cd %~dp0/clumsy
 
 start launchRpc.bat
+rem --------------------------------------
 
 cd %~dp0/pytest
 

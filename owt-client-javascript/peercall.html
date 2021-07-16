@@ -54,6 +54,7 @@
   <script src="https://webrtchacks.github.io/adapter/adapter-7.0.0.js" type="text/javascript"></script>
   <script src="js/sc.websocket.js" type="text/javascript"></script>
   <script src="js/owt.js" type="text/javascript"></script>
+  <script src="js/env.js" type="text/javascript"></script>
   <h1>Intel<sup>&reg;</sup> Collaboration Suite for WebRTC</h1>
   <h2>P2P Sample</h2>
   <div id="description">
@@ -112,11 +113,11 @@
   <script type="text/javascript">
     'use strict';
     var isVideo = 1;
-    var serverAddress='https://localhost:8096';  // Please change example.com to signaling server's address.
+    var serverAddress = env.SignalingServer;  // Please change example.com to signaling server's address.
     const signaling = new SignalingChannel();
     let publicationForCamera;
     let publicationForScreen;
-    const controlSocket = io("https://localhost:8098");
+    const controlSocket = io(env.ControlSignalEndpoint_STAGE);
     controlSocket.on("connect", () => {
       console.log("server socket id : " + controlSocket.id);
       $('#uid').val(controlSocket.id);
