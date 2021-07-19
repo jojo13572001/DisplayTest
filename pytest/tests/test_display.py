@@ -71,7 +71,7 @@ def launch_env(currentDir):
 #---------------Remote Launch clumsy--------------------------------
     channel = grpc.insecure_channel(clumsy_rpc_Address)
     clumsyStub = clumsy_pb2_grpc.LaunchStub(channel)
-    response = clumsyStub.Start(clumsy_pb2.LaunchRequest(args='--filter "inbound and ip.SrcAddr == 192.168.1.137"', 
+    response = clumsyStub.Start(clumsy_pb2.LaunchRequest(args=config['Clumsy']['ARGS'], 
                                                          processName="clumsy.exe"))
     check_state(response.result=="OK", response.message, owt_server_p2pStub, displayStub, clumsyStub)
 

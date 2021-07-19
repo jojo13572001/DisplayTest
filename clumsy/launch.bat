@@ -2,10 +2,10 @@ pushd .
 
 cd %~dp0
 
-echo start clumsy.exe %1 %2
+echo start clumsy.exe %*
 
 taskkill /f /im clumsy.exe
 
-start clumsy.exe %1 %2
+start clumsy.exe %*
 
 popd
