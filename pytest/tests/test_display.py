@@ -1,6 +1,7 @@
 from libs.module import Module
 import time
 import os
+from pathlib import Path
 import owtClient
 import subprocess
 import sys
@@ -16,7 +17,7 @@ import clumsy_pb2, clumsy_pb2_grpc
 config = configparser.ConfigParser()
 config.read(currentDir + "/../../config.ini")
 
-waitTime = 3
+waitTime = 5
 
 owt_server_p2p_rpc_Address = config['SignalingServer']['IP'] + ":"+ config['SignalingServer']['RPC_PORT']
 
@@ -49,7 +50,7 @@ def check_state(state, errorMessage, owt_server_p2pStub, displayStub, clumsyStub
     if state == False:
        print(errorMessage)
        close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
-       sys.exit(0)
+       #sys.exit(0)
 
 #Launch p2p servers
 def launch_env(currentDir):
@@ -82,16 +83,22 @@ def launch_env(currentDir):
     check_process("chrome.exe", "Launch owt-client-javascript failure", owt_server_p2pStub, displayStub, clumsyStub)
     return driver, owt_server_p2pStub, displayStub, clumsyStub
 
-#-------------------Test Cases-------------------------------------
-def test_check_h264_codec_func():
+#Launch diplay, owt server, clumsy and web client and then start p2p sharing
+def startSharing(currentDir, waitTime):
     driver, owt_server_p2pStub, displayStub, clumsyStub = launch_env(currentDir)
     result = owtClient.waitDisplayReady(driver)
     check_state(result, "wait for display stream ready fail", owt_server_p2pStub, displayStub, clumsyStub)
     result = owtClient.loginAndWaitReady(driver)
     check_state(result, "wait for login ready fail", owt_server_p2pStub, displayStub, clumsyStub)
     owtClient.startShare(driver, "0000")
-    result = owtClient.waitStreamReady(driver)
+    result = owtClient.waitStreamReady(driver, waitTime)
     check_state(result, "wait for stream ready fail", owt_server_p2pStub, displayStub, clumsyStub)
+    return driver, owt_server_p2pStub, displayStub, clumsyStub, result
+
+#-------------------Test Cases-------------------------------------
+#Check current webrtc using h264 codec
+def test_check_h264_codec_func():
+    driver, owt_server_p2pStub, displayStub, clumsyStub, result = startSharing(currentDir, waitTime)
     strStats = owtClient.getStats(driver)
     while strStats == '':
           strStats = owtClient.getStats(driver)
@@ -101,6 +108,7 @@ def test_check_h264_codec_func():
            assert Module.check_h264_codec_type(stat['codecId']) is True
     close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
 
+#Check if we can detect otp typing error
 def test_check_otp_fail_func():
     driver, owt_server_p2pStub, displayStub, clumsyStub = launch_env(currentDir)
     result = owtClient.waitDisplayReady(driver)
@@ -111,17 +119,11 @@ def test_check_otp_fail_func():
     assert owtClient.waitforOTPfail(driver) is True
     close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
 
-#if vidoe is stopped, we will get the same timestamp from 2 sequential stat reports
+#Check we can detect screen sharing is stopped after clicking Stop
+#The method is to get the same timestamp from 2 sequential stat reports in a specified interval
+#If the video is stopped, the stat report are all the same
 def test_check_stopped_func():
-    driver, owt_server_p2pStub, displayStub, clumsyStub = launch_env(currentDir)
-    result = owtClient.waitDisplayReady(driver)
-    check_state(result, "wait for display stream ready fail", owt_server_p2pStub, displayStub, clumsyStub)
-    result = owtClient.loginAndWaitReady(driver)
-    check_state(result, "wait for login ready fail", owt_server_p2pStub, displayStub, clumsyStub)
-    owtClient.startShare(driver, "0000")
-    result = owtClient.waitStreamReady(driver)
-    check_state(result, "wait for stream ready fail", owt_server_p2pStub, displayStub, clumsyStub)
-
+    driver, owt_server_p2pStub, displayStub, clumsyStub, result = startSharing(currentDir, waitTime)
     strStats = owtClient.getStats(driver)
     while strStats == '':
           strStats = owtClient.getStats(driver)
@@ -145,3 +147,39 @@ def test_check_stopped_func():
 
     assert (timeStampStart == timeStampStop) is True
     close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
+
+'''
+# dump webrtc stats after interpolating clumsy lag, drop, throttle parameters
+def test_clumsy_dump_func():
+    path = currentDir + "/statsDump"
+    try:
+      Path(path).mkdir(parents=True, exist_ok=True)
+    except OSError:
+      print ("Creation of the directory %s failed" % path)
+      assert False
+
+    for i in range(100, -10, -10):
+      for j in range(30, -3, -3):
+        for k in range(30, -3, -3):
+            fileName = "l"+str(i)+"_d"+ str(j)+"_t"+ str(k)
+            if not os.path.exists(path+"/"+fileName+".txt"):
+                lagTime = i #0-3000
+                dropChance = j #0-100
+                throttleChance = k #0-100
+                config['Clumsy']['ARGS'] = '--filter "udp and inbound" --lag on --lag-inbound on --lag-time ' + str(lagTime) + \
+                                                               ' --drop on --drop-inbound on --drop-chance ' + str(dropChance)+ \
+                                                               ' --throttle on --throttle-inbound on --throttle-chance ' + str(throttleChance)
+                result = False
+                while result == False:
+                  driver, owt_server_p2pStub, displayStub, clumsyStub, result = startSharing(currentDir, 20)
+                owtClient.launchAndPlayFullScreenVideo(currentDir+"/../../owt-client-javascript/fullscreen_video.html")
+                time.sleep(10) #wait for 10 seconds and get dump stats
+                strStats = owtClient.getStats(driver)
+                while strStats == '':
+                      strStats = owtClient.getStats(driver)
+                fp = open(path+"/"+fileName+".txt", "w")
+                fp.write(strStats)
+                fp.close()
+                close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
+    assert True
+'''

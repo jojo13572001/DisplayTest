@@ -19,11 +19,19 @@ def init(screenID, ControlSignalEndpoint_STAGE, CodeMappingEndpoint_STAGE, Signa
     
     options = Options()
     options.set_capability("acceptInsecureCerts", True)
-    options.add_argument("--window-size=1920,882")
+    options.add_argument("--start-maximized")
     options.add_argument('--allow-insecure-localhost')
     options.add_argument("--ignore-certificate-errors")
     options.add_argument("--auto-select-desktop-capture-source=" + screenID)
     return options
+
+def launchAndPlayFullScreenVideo(path):
+    options = Options()
+    options.add_argument("--start-maximized")
+    driver = webdriver.Chrome(options=options)
+    driver.get(path)
+    login = driver.find_element_by_id('fullscreenvideo')
+    login.click()
 
 def launch(path, screenID, ControlSignalEndpoint_STAGE, CodeMappingEndpoint_STAGE, SignalingServer):
     driver = webdriver.Chrome(options=init(screenID, 
@@ -77,7 +85,7 @@ def startShare(driver, otp):
     share.click()
 
 ##---------wait until p2p stream is coming--------------
-def waitStreamReady(driver):
+def waitStreamReady(driver, waitTime):
     try:    
         print ("Start to wait for p2p stream ready")
         shareButtonId = driver.find_element_by_id('target-screen')
