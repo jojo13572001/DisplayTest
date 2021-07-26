@@ -176,15 +176,20 @@ def test_clumsy_dump_func():
                   while result == False:
                     driver, owt_server_p2pStub, displayStub, clumsyStub, result = startSharing(currentDir, 20)
                   owtClient.launchAndPlayFullScreenVideo(currentDir+"/../../owt-client-javascript/fullscreen_video.html")
-                except error:
+                except OSError:
                   close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
                   k = k+3
                   continue
 
                 time.sleep(10) #wait for 10 seconds and get dump stats
-                strStats = owtClient.getStats(driver)
-                while strStats == '':
-                      strStats = owtClient.getStats(driver)
+                try:
+                  strStats = owtClient.getStats(driver)
+                  while strStats == '':
+                        strStats = owtClient.getStats(driver)
+                except OSError:
+                  close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
+                  k = k+3
+                  continue
                 fp = open(path+"/"+fileName+".txt", "w")
                 fp.write(strStats)
                 fp.close()
