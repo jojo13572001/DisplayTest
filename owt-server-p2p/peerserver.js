@@ -28,7 +28,7 @@ app.get('/code/:id', function(req, res) {
 
 var server = app.listen(config.port.plain);
 var servers = require("https").createServer(httpsOptions, app).listen(config.port.secured);
-var controlServers = require("https").createServer(httpsOptions, app).listen(config.port.secured+2);
+var controlServers = require("https").createServer(httpsOptions, app).listen(config.port.csecured);
 var io = require('socket.io').listen(server);
 var ios = require('socket.io').listen(servers);
 var controlIos = require('socket.io').listen(controlServers);
@@ -210,5 +210,5 @@ controlIos.on('connection',onControlConnection);
 });*/
 
 console.info('Signal server Listening port: ' + config.port.plain + '/' + config.port.secured);
-console.info('Control server Listening port: ' + (config.port.secured+2))
-console.info('Otp server Listening port: ' + (config.port.secured+2))
+console.info('Control server Listening port: ' + (config.port.csecured))
+console.info('Otp server Listening port: ' + (config.port.csecured))

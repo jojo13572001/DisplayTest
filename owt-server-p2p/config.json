@@ -1,7 +1,8 @@
 {
   "port": {
     "plain": 8095,
-    "secured": 8096
+    "secured": 8096,
+    "csecured": 8098
   },
   "log": {
     "enabled": true,
