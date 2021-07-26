@@ -30,8 +30,8 @@ def launchAndPlayFullScreenVideo(path):
     options.add_argument("--start-maximized")
     driver = webdriver.Chrome(options=options)
     driver.get(path)
-    login = driver.find_element_by_id('fullscreenvideo')
-    login.click()
+    fullscreenvideo = driver.find_element_by_id('fullscreenvideo')
+    fullscreenvideo.click()
 
 def launch(path, screenID, ControlSignalEndpoint_STAGE, CodeMappingEndpoint_STAGE, SignalingServer):
     driver = webdriver.Chrome(options=init(screenID, 

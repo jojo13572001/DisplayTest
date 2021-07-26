@@ -94,7 +94,7 @@ def startSharing(currentDir, waitTime):
     result = owtClient.waitStreamReady(driver, waitTime)
     check_state(result, "wait for stream ready fail", owt_server_p2pStub, displayStub, clumsyStub)
     return driver, owt_server_p2pStub, displayStub, clumsyStub, result
-
+'''
 #-------------------Test Cases-------------------------------------
 #Check current webrtc using h264 codec
 def test_check_h264_codec_func():
@@ -147,10 +147,12 @@ def test_check_stopped_func():
 
     assert (timeStampStart == timeStampStop) is True
     close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
-
 '''
 # dump webrtc stats after interpolating clumsy lag, drop, throttle parameters
 def test_clumsy_dump_func():
+    lag = 100
+    drop = 30
+    throttle = 30
     path = currentDir + "/statsDump"
     try:
       Path(path).mkdir(parents=True, exist_ok=True)
@@ -158,9 +160,9 @@ def test_clumsy_dump_func():
       print ("Creation of the directory %s failed" % path)
       assert False
 
-    for i in range(100, -10, -10):
-      for j in range(30, -3, -3):
-        for k in range(30, -3, -3):
+    for i in range(lag, -int(lag/10), -int(lag/10)):
+      for j in range(drop, -int(drop/10), -int(drop/10)):
+        for k in range(throttle, -int(throttle/10), -int(throttle/10)):
             fileName = "l"+str(i)+"_d"+ str(j)+"_t"+ str(k)
             if not os.path.exists(path+"/"+fileName+".txt"):
                 lagTime = i #0-3000
@@ -170,9 +172,15 @@ def test_clumsy_dump_func():
                                                                ' --drop on --drop-inbound on --drop-chance ' + str(dropChance)+ \
                                                                ' --throttle on --throttle-inbound on --throttle-chance ' + str(throttleChance)
                 result = False
-                while result == False:
-                  driver, owt_server_p2pStub, displayStub, clumsyStub, result = startSharing(currentDir, 20)
-                owtClient.launchAndPlayFullScreenVideo(currentDir+"/../../owt-client-javascript/fullscreen_video.html")
+                try:
+                  while result == False:
+                    driver, owt_server_p2pStub, displayStub, clumsyStub, result = startSharing(currentDir, 20)
+                  owtClient.launchAndPlayFullScreenVideo(currentDir+"/../../owt-client-javascript/fullscreen_video.html")
+                except error:
+                  close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
+                  k = k+3
+                  continue
+
                 time.sleep(10) #wait for 10 seconds and get dump stats
                 strStats = owtClient.getStats(driver)
                 while strStats == '':
@@ -182,4 +190,3 @@ def test_clumsy_dump_func():
                 fp.close()
                 close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
     assert True
-'''
