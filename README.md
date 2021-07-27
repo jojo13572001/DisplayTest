@@ -34,4 +34,11 @@
 * **auto_test.cmd** &nbsp;     &nbsp;remote launch all instances and control automation test
 * **config.ini** &nbsp;     &nbsp;record each RPC ip and port. It should be synchronous with all _ main _.py and config.json
 
-# Architecture
+# Instance Architecture
+<image src="owt-client-javascript/pic/Architecture.png">
+    
+# Connection Flow
+<image src="owt-client-javascript/pic/test_clumsy_dump_func_flow.png">
+
+# Data Transmit Flow
+<image src="owt-client-javascript/pic/test_clumsy_dump_func_sequence.png">
