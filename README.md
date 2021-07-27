@@ -9,7 +9,7 @@
 
 # Auto Test
 1. execute owt-server-p2p/launchRpc.bat, DisplayWPF_Net47/launchRpc.bat, clumsy/launchRpc.bat (admin mode) to launch RPC agents  
-2. fill agent addresses in step1 to config.ini that is the same host with auto_test.cmd
+2. fill agent addresses in step1 to config.ini at the same host with auto_test.cmd
 3. execute auto_test.cmd  
 
 # Folder structure
@@ -22,7 +22,7 @@
      **---  _ main _.py** &nbsp;     &nbsp;specify RPC port
 * **[clumsy](https://github.com/jagt/clumsy)**
 * **[owt-server-p2p](https://github.com/open-webrtc-toolkit/owt-server-p2p)**  
-     **---  config.json** &nbsp;     &nbsp;specify owt-server-p2p socketIo port, control signal server port and code mapping server port(the same with control signal server port)
+     **---  config.json** &nbsp;     &nbsp;specify owt-server-p2p socketIO port, control signal server port and code mapping server port(the same with control signal server)
 * **[owt-client-javascript](https://github.com/open-webrtc-toolkit/owt-client-javascript)**  
      **--  fullscreen_video.html** &nbsp;     &nbsp;for test_clumsy_dump_func test case to screen sharing with youtube content
 * **pytest**  

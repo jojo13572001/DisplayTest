@@ -42,7 +42,7 @@ def launch(path, screenID, ControlSignalEndpoint_STAGE, CodeMappingEndpoint_STAG
     return driver
 
 ##-----deliver socket id to remote Display----------
-def waitDisplayReady(driver):
+def waitControlSocketReady(driver):
     try:    
         print ("Start to wait for remote Display ready")
         uid = driver.find_element_by_id("uid")

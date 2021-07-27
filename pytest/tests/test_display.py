@@ -39,18 +39,20 @@ def close_all_instances(owt_server_p2pStub, displayStub, clumsyStub):
     if owt_server_p2pStub != None:
        owt_server_p2pStub.Terminate(owt_server_p2p_pb2.TerminateRequest(processName="node.exe"))
 
-def check_process(processName, errorMessage, owt_server_p2pStub, displayStub, clumsyStub):
+def check_process(processName, errorMessage, owt_server_p2pStub, displayStub, clumsyStub, exit=False):
     progs = str(subprocess.check_output('tasklist'))
     if processName not in progs:
        print(errorMessage)
        close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
-       sys.exit(0)
+       if exit == True:
+          sys.exit(0)
 
-def check_state(state, errorMessage, owt_server_p2pStub, displayStub, clumsyStub):
+def check_state(state, errorMessage, owt_server_p2pStub, displayStub, clumsyStub, exit=False):
     if state == False:
        print(errorMessage)
        close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
-       #sys.exit(0)
+       if exit == True:
+          sys.exit(0)
 
 #Launch p2p servers
 def launch_env(currentDir):
@@ -58,7 +60,7 @@ def launch_env(currentDir):
     channel = grpc.insecure_channel(owt_server_p2p_rpc_Address)
     owt_server_p2pStub = owt_server_p2p_pb2_grpc.LaunchStub(channel)
     response = owt_server_p2pStub.Start(owt_server_p2p_pb2.LaunchRequest(processName="node.exe"))
-    check_state(response.result=="OK", response.message, owt_server_p2pStub, None, None)
+    check_state(response.result=="OK", response.message, owt_server_p2pStub, None, None, True)
 
 #---------------Remote Launch Display-------------------------------
     channel = grpc.insecure_channel(display_rpc_Address)
@@ -67,34 +69,38 @@ def launch_env(currentDir):
                                                            CodeMappingEndpoint_STAGE=CodeMappingEndpoint_STAGE,
                                                            SignalingServer=SignalingServer,
                                                            processName="DisplayWPF.exe"))
-    check_state(response.result=="OK", response.message, owt_server_p2pStub, displayStub, None)
+    check_state(response.result=="OK", response.message, owt_server_p2pStub, displayStub, None, True)
 
 #---------------Remote Launch clumsy--------------------------------
     channel = grpc.insecure_channel(clumsy_rpc_Address)
     clumsyStub = clumsy_pb2_grpc.LaunchStub(channel)
     response = clumsyStub.Start(clumsy_pb2.LaunchRequest(args=config['Clumsy']['ARGS'], 
                                                          processName="clumsy.exe"))
-    check_state(response.result=="OK", response.message, owt_server_p2pStub, displayStub, clumsyStub)
+    check_state(response.result=="OK", response.message, owt_server_p2pStub, displayStub, clumsyStub, True)
 
 #---------------Local Launch web client----------------------------
     driver = owtClient.launch(currentDir+"/../../owt-client-javascript/peercall.html", "Entire screen", ControlSignalEndpoint_STAGE, 
                                                                                                         CodeMappingEndpoint_STAGE,
                                                                                                         SignalingServer)
-    check_process("chrome.exe", "Launch owt-client-javascript failure", owt_server_p2pStub, displayStub, clumsyStub)
+    check_process("chrome.exe", "Launch owt-client-javascript failure", owt_server_p2pStub, displayStub, clumsyStub, True)
     return driver, owt_server_p2pStub, displayStub, clumsyStub
 
 #Launch diplay, owt server, clumsy and web client and then start p2p sharing
 def startSharing(currentDir, waitTime):
     driver, owt_server_p2pStub, displayStub, clumsyStub = launch_env(currentDir)
-    result = owtClient.waitDisplayReady(driver)
+    finalResult = True
+    result = owtClient.waitControlSocketReady(driver)
+    finalResult = finalResult and result
     check_state(result, "wait for display stream ready fail", owt_server_p2pStub, displayStub, clumsyStub)
     result = owtClient.loginAndWaitReady(driver)
+    finalResult = finalResult and result
     check_state(result, "wait for login ready fail", owt_server_p2pStub, displayStub, clumsyStub)
     owtClient.startShare(driver, "0000")
     result = owtClient.waitStreamReady(driver, waitTime)
+    finalResult = finalResult and result
     check_state(result, "wait for stream ready fail", owt_server_p2pStub, displayStub, clumsyStub)
-    return driver, owt_server_p2pStub, displayStub, clumsyStub, result
-'''
+    return driver, owt_server_p2pStub, displayStub, clumsyStub, finalResult
+
 #-------------------Test Cases-------------------------------------
 #Check current webrtc using h264 codec
 def test_check_h264_codec_func():
@@ -111,7 +117,7 @@ def test_check_h264_codec_func():
 #Check if we can detect otp typing error
 def test_check_otp_fail_func():
     driver, owt_server_p2pStub, displayStub, clumsyStub = launch_env(currentDir)
-    result = owtClient.waitDisplayReady(driver)
+    result = owtClient.waitControlSocketReady(driver)
     check_state(result, "wait for display stream ready fail", owt_server_p2pStub, displayStub, clumsyStub)
     result = owtClient.loginAndWaitReady(driver)
     check_state(result, "wait for login ready fail", owt_server_p2pStub, displayStub, clumsyStub)
@@ -147,8 +153,9 @@ def test_check_stopped_func():
 
     assert (timeStampStart == timeStampStop) is True
     close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
-'''
+
 # dump webrtc stats after interpolating clumsy lag, drop, throttle parameters
+'''
 def test_clumsy_dump_func():
     lag = 100
     drop = 30
@@ -195,3 +202,4 @@ def test_clumsy_dump_func():
                 fp.close()
                 close_all_instances(owt_server_p2pStub, displayStub, clumsyStub)
     assert True
+'''
